@@ -1,0 +1,15 @@
+{
+  "name": "TacticalPrompt — AI Tactical Prompt Design Platform",
+  "short_name": "TacticalPrompt",
+  "description": "UAM KoreaTech — AI tactical prompt design platform.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#3B82F6",
+  "background_color": "#0B1120",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    { "src": "./icons/icon-192.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
