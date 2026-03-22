@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>TacticalPrompt v0.9</title>
+<meta name="description" content="UAM KoreaTech â AI Tactical Prompt Design Matching Platform">
+<meta name="theme-color" content="#3B82F6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TacticalPrompt">
+<link rel="apple-touch-icon" href="./icons/icon-192.svg">
+<link rel="manifest" href="./manifest.json">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1120;--card:#151C2C;--card2:#1A2338;--border:rgba(148,163,184,.08);--borderL:rgba(148,163,184,.15);
+  --blue:#3B82F6;--blueL:#60A5FA;--cyan:#06B6D4;--violet:#8B5CF6;--amber:#F59E0B;--emerald:#10B981;--rose:#F43F5E;
+  --text:#F1F5F9;--muted:#64748B;--dim:#475569;
+  --font:'SF Pro Display',-apple-system,'Segoe UI',system-ui,sans-serif;--mono:'SF Mono','Fira Code',monospace
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}
+
+/* ===== LOGIN ===== */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column}
+.login-box{text-align:center;padding:40px}
+.login-logo{font-size:3em;font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.login-sub{color:var(--muted);font-size:.8em;letter-spacing:2px;margin-bottom:8px}
+.login-tagline{color:var(--dim);font-size:.7em;margin-bottom:32px}
+.login-box input{background:var(--card);border:2px solid var(--border);color:var(--text);padding:14px 20px;border-radius:12px;font-size:1em;width:280px;text-align:center;outline:none;transition:.3s}
+.login-box input:focus{border-color:var(--blue)}
+.login-box input.err{border-color:var(--rose);animation:shake .4s}
+.login-box button{display:block;width:280px;margin:16px auto 0;padding:14px;background:linear-gradient(135deg,var(--blue),#2563EB);color:#fff;border:none;border-radius:12px;font-size:1em;font-weight:700;cursor:pointer;letter-spacing:1px;transition:.2s}
+.login-box button:active{transform:scale(.97)}
+.login-patent{color:var(--cyan);font-family:var(--mono);font-size:.7em;margin-top:24px;opacity:.6}
+.login-models{display:flex;gap:8px;justify-content:center;margin-top:20px}
+.login-model-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.65em;color:var(--muted)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* ===== APP SHELL ===== */
+#app{display:none;height:100%;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--border);min-height:48px}
+.topbar .title{font-size:.8em;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar .status{display:flex;gap:8px;align-items:center}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.conn-badge{font-size:.6em;padding:2px 8px;border-radius:10px;font-weight:600;background:rgba(16,185,129,.12);color:var(--emerald)}
+
+/* SIM BANNER */
+.sim-banner{background:linear-gradient(90deg,rgba(59,130,246,.12),rgba(59,130,246,.03));border-bottom:1px solid rgba(59,130,246,.2);padding:4px 16px;font-size:.65em;color:var(--blueL);text-align:center;letter-spacing:.5px}
+
+/* ===== BOTTOM TABS ===== */
+.tabs{display:flex;background:var(--card);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;padding:8px 4px;text-align:center;font-size:.6em;font-weight:700;letter-spacing:.5px;color:var(--muted);cursor:pointer;transition:.2s;user-select:none}
+.tab.active{color:var(--blue)}
+.tab .tab-icon{font-size:1.5em;display:block;margin-bottom:2px}
+
+/* ===== PANELS ===== */
+.panel-area{flex:1;overflow-y:auto;position:relative}
+.panel{display:none;height:100%;overflow-y:auto}
+.panel.active{display:block}
+
+/* ===== P1: DASHBOARD ===== */
+.dash-hero{padding:20px 16px;background:linear-gradient(180deg,rgba(59,130,246,.08),transparent)}
+.dash-greeting{font-size:.75em;color:var(--muted);margin-bottom:4px}
+.dash-title{font-size:1.4em;font-weight:800;margin-bottom:2px}
+.dash-title span{color:var(--blue)}
+.dash-desc{font-size:.75em;color:var(--dim);margin-bottom:16px}
+.dash-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.stat-val{font-size:1.3em;font-weight:800;font-family:var(--mono)}
+.stat-label{font-size:.6em;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+.dash-section-title{font-size:.7em;font-weight:700;color:var(--muted);letter-spacing:2px;padding:0 16px;margin:16px 0 8px}
+.ai-models-row{display:flex;gap:8px;padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ai-model-card{min-width:140px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;flex-shrink:0}
+.ai-model-logo{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9em;color:#fff;margin-bottom:8px}
+.ai-model-name{font-size:.8em;font-weight:700}
+.ai-model-provider{font-size:.6em;color:var(--muted)}
+.ai-model-users{font-size:.6em;color:var(--dim);margin-top:4px;font-family:var(--mono)}
+.domain-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px}
+.domain-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.2s}
+.domain-card:active{transform:scale(.96);border-color:var(--blue)}
+.domain-icon{font-size:1.5em;margin-bottom:4px}
+.domain-label{font-size:.65em;font-weight:700;letter-spacing:.5px}
+.domain-count{font-size:.55em;color:var(--muted);margin-top:2px}
+
+/* ===== P2: LIVE DEMO ===== */
+.demo-section{padding:16px}
+.demo-header{font-size:.8em;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:12px;text-align:center}
+.selector-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;justify-content:center}
+.sel-chip{padding:6px 14px;border-radius:20px;font-size:.7em;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:.2s}
+.sel-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sel-chip.disabled{opacity:.4;cursor:not-allowed}
+.blueprint-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.bp-name{font-size:.7em;font-weight:700;font-family:var(--mono);color:var(--cyan)}
+.bp-stats{display:flex;gap:12px}
+.bp-stat{text-align:center}
+.bp-stat-val{font-size:.75em;font-weight:700;font-family:var(--mono);color:var(--blueL)}
+.bp-stat-label{font-size:.5em;color:var(--muted)}
+.demo-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);font-size:.85em;resize:none;outline:none;min-height:80px;transition:.3s}
+.demo-input:focus{border-color:var(--blue)}
+.demo-actions{display:flex;gap:8px;margin-top:8px}
+.btn-example{flex:1;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:.7em;font-weight:600;cursor:pointer;text-align:center}
+.btn-execute{flex:2;padding:10px;background:linear-gradient(135deg,var(--blue),#2563EB);border:none;border-radius:10px;color:#fff;font-size:.8em;font-weight:700;cursor:pointer;letter-spacing:1px}
+.btn-execute:active{transform:scale(.97)}
+.btn-execute:disabled{opacity:.5}
+
+/* RESULT */
+.result-container{margin-top:16px;display:none}
+.result-container.show{display:block}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.result-model{font-size:.7em;font-weight:700;padding:4px 10px;border-radius:8px;color:#fff}
+.result-time{font-size:.65em;color:var(--muted);font-family:var(--mono)}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.result-title{padding:12px;font-size:.85em;font-weight:700;border-bottom:1px solid var(--border);color:var(--text)}
+.result-section{padding:10px 12px;border-bottom:1px solid var(--border)}
+.result-section:last-child{border-bottom:none}
+.result-section-head{font-size:.65em;font-weight:700;color:var(--blue);letter-spacing:1px;margin-bottom:4px}
+.result-section-body{font-size:.75em;color:var(--muted);line-height:1.5}
+.result-scores{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 12px;background:rgba(59,130,246,.04)}
+.score-item{text-align:center}
+.score-val{font-size:.9em;font-weight:800;font-family:var(--mono)}
+.score-label{font-size:.5em;color:var(--muted);margin-top:1px}
+
+/* ===== P3: BLUEPRINTS ===== */
+.bp-tabs{display:flex;gap:4px;padding:12px 12px 0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bp-tab{padding:6px 12px;border-radius:8px;font-size:.65em;font-weight:700;letter-spacing:.5px;color:var(--muted);background:var(--card);border:1px solid var(--border);cursor:pointer;white-space:nowrap;transition:.2s}
+.bp-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.bp-list{padding:12px}
+.bp-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.bp-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.bp-item-name{font-size:.75em;font-weight:700;font-family:var(--mono);color:var(--cyan)}
+.bp-item-badge{font-size:.55em;padding:2px 8px;border-radius:8px;font-weight:600}
+.bp-item-badge.verified{background:rgba(16,185,129,.12);color:var(--emerald)}
+.bp-item-badge.beta{background:rgba(245,158,11,.12);color:var(--amber)}
+.bp-item-desc{font-size:.7em;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.bp-item-meta{display:flex;gap:12px;font-size:.6em;color:var(--dim);font-family:var(--mono)}
+
+/* ===== P4: SETTINGS ===== */
+.settings-panel{padding:16px}
+.settings-app-info{text-align:center;padding:24px 0;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.settings-logo{font-size:2em;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.settings-ver{font-size:.7em;color:var(--muted);font-family:var(--mono);margin-top:4px}
+.settings-group{margin-bottom:20px}
+.settings-group-title{font-size:.65em;font-weight:700;color:var(--muted);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase}
+.settings-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:4px;cursor:pointer}
+.settings-item:active{background:var(--card2)}
+.si-left{display:flex;align-items:center;gap:10px}
+.si-icon{font-size:1.1em}
+.si-label{font-size:.8em;font-weight:600}
+.si-right{font-size:.7em;color:var(--muted);display:flex;align-items:center;gap:4px}
+.si-arrow{color:var(--dim)}
+.settings-footer{text-align:center;padding:20px 0;font-size:.6em;color:var(--dim);font-family:var(--mono);line-height:1.8}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="login">
+  <div class="login-box">
+    <div class="login-logo">TP</div>
+    <div class="login-sub">TACTICALPROMPT</div>
+    <div class="login-tagline">AI Tactical Prompt Design Matching Platform</div>
+    <input type="password" id="accessCode" placeholder="ACCESS CODE" autocomplete="off">
+    <button onclick="doLogin()">AUTHENTICATE</button>
+    <div class="login-models">
+      <span class="login-model-chip">GPT-4o</span>
+      <span class="login-model-chip">Gemini 2.0</span>
+      <span class="login-model-chip">Grok-3</span>
+    </div>
+    <div class="login-patent">UAM KoreaTech Co., Ltd.<br>v0.9.0-beta</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="title">TACTICALPROMPT</div>
+    <div class="status">
+      <span class="conn-badge">3 MODELS ONLINE</span>
+      <div class="status-dot"></div>
+    </div>
+  </div>
+  <div class="sim-banner">SIMULATION MODE â Demo v0.9.0-beta â UAM KoreaTech</div>
+
+  <!-- Panel Area -->
+  <div class="panel-area">
+    <!-- P1: Dashboard -->
+    <div class="panel active" id="p-dash">
+      <div class="dash-hero">
+        <div class="dash-greeting">OPERATOR DASHBOARD</div>
+        <div class="dash-title">Tactical <span>Prompt</span> Engine</div>
+        <div class="dash-desc">6 Domains Ã 3 AI Models â Mission-Grade Prompt Matching</div>
+        <div class="dash-stats">
+          <div class="stat-card"><div class="stat-val" style="color:var(--blue)">127</div><div class="stat-label">BLUEPRINTS</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--emerald)">94.2%</div><div class="stat-label">AVG ACCURACY</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--cyan)">1.9s</div><div class="stat-label">AVG LATENCY</div></div>
+        </div>
+      </div>
+      <div class="dash-section-title">AI MODELS</div>
+      <div class="ai-models-row" id="modelsRow"></div>
+      <div class="dash-section-title" style="margin-top:16px">TACTICAL DOMAINS</div>
+      <div class="domain-grid" id="domainGrid"></div>
+      <div style="height:24px"></div>
+    </div>
+
+    <!-- P2: Live Demo -->
+    <div class="panel" id="p-demo">
+      <div class="demo-section">
+        <div class="demo-header">LIVE DEMO â PROMPT EXECUTION ENGINE</div>
+        <div style="font-size:.65em;color:var(--muted);text-align:center;margin-bottom:12px">SELECT MODEL</div>
+        <div class="selector-row" id="modelSelector"></div>
+        <div style="font-size:.65em;color:var(--muted);text-align:center;margin:8px 0">SELECT DOMAIN</div>
+        <div class="selector-row" id="domainSelector"></div>
+        <div class="blueprint-info" id="bpInfo">
+          <div class="bp-name" id="bpName">â</div>
+          <div class="bp-stats">
+            <div class="bp-stat"><div class="bp-stat-val" id="bpAcc">â</div><div class="bp-stat-label">ACCURACY</div></div>
+            <div class="bp-stat"><div class="bp-stat-val" id="bpLat">â</div><div class="bp-stat-label">LATENCY</div></div>
+          </div>
+        </div>
+        <textarea class="demo-input" id="promptInput" placeholder="Enter tactical prompt requirement..."></textarea>
+        <div class="demo-actions">
+          <div class="btn-example" onclick="loadExample()">LOAD EXAMPLE</div>
+          <button class="btn-execute" id="btnExec" onclick="executePrompt()">EXECUTE PROMPT</button>
+        </div>
+        <div class="result-container" id="resultBox">
+          <div class="result-header">
+            <div class="result-model" id="resModel">GPT-4o</div>
+            <div class="result-time" id="resTime">2.1s</div>
+          </div>
+          <div class="result-card">
+            <div class="result-title" id="resTitle">â</div>
+            <div id="resSections"></div>
+            <div class="result-scores" id="resScores"></div>
+          </div>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+    </div>
+
+    <!-- P3: Blueprints -->
+    <div class="panel" id="p-bp">
+      <div class="bp-tabs" id="bpTabs"></div>
+      <div class="bp-list" id="bpList"></div>
+    </div>
+
+    <!-- P4: Settings -->
+    <div class="panel" id="p-settings">
+      <div class="settings-panel">
+        <div class="settings-app-info">
+          <div class="settings-logo">TP</div>
+          <div style="font-size:.85em;font-weight:700;margin-top:4px">TacticalPrompt</div>
+          <div class="settings-ver">v0.9.0-beta (Build 1)</div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-title">Account</div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">API Key Management</span></div><div class="si-right">Configure <span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð³</span><span class="si-label">Subscription</span></div><div class="si-right">Free Tier <span class="si-arrow">âº</span></div></div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-title">Preferences</div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð¤</span><span class="si-label">Default AI Model</span></div><div class="si-right">GPT-4o <span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð¯</span><span class="si-label">Default Domain</span></div><div class="si-right">CBRN <span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">Language</span></div><div class="si-right">íêµ­ì´ <span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">Validation Standard</span></div><div class="si-right">MIL-STD <span class="si-arrow">âº</span></div></div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-title">Links</div>
+          <div class="settings-item" onclick="window.open('https://tacticalprompt.com')"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">Website</span></div><div class="si-right"><span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð°</span><span class="si-label">Blog</span></div><div class="si-right"><span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">Terms of Service</span></div><div class="si-right"><span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">ð</span><span class="si-label">Privacy Policy</span></div><div class="si-right"><span class="si-arrow">âº</span></div></div>
+          <div class="settings-item"><div class="si-left"><span class="si-icon">â ï¸</span><span class="si-label">ITAR Compliance Notice</span></div><div class="si-right"><span class="si-arrow">âº</span></div></div>
+        </div>
+        <div class="settings-footer">
+          UAM KoreaTech Co., Ltd.<br>
+          Bundle: com.uamkoreatech.tacticalprompt<br>
+          App Store ID: 6760960097<br>
+          Â© 2026 All Rights Reserved
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('dash',this)"><span class="tab-icon">ð </span>HOME</div>
+    <div class="tab" onclick="switchTab('demo',this)"><span class="tab-icon">â¡</span>DEMO</div>
+    <div class="tab" onclick="switchTab('bp',this)"><span class="tab-icon">ð</span>BLUEPRINTS</div>
+    <div class="tab" onclick="switchTab('settings',this)"><span class="tab-icon">âï¸</span>SETTINGS</div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const MODELS = [
+  {id:'gpt4o',name:'GPT-4o / o3',provider:'OpenAI',users:'400M+',color:'#10a37f',logo:'G'},
+  {id:'gemini',name:'Gemini 2.0 Flash',provider:'Google',users:'350M+',color:'#4285f4',logo:'G'},
+  {id:'grok3',name:'Grok-3',provider:'xAI',users:'100M+',color:'#1d9bf0',logo:'X'},
+  {id:'claude',name:'Claude Opus 4',provider:'Anthropic',users:'Coming Soon',color:'#d97706',logo:'C',disabled:true}
+];
+const DOMAINS = [
+  {id:'cbrn',label:'CBRN',icon:'â¢ï¸',color:'#F43F5E',count:24},
+  {id:'isr',label:'ISR',icon:'ð°ï¸',color:'#8B5CF6',count:21},
+  {id:'c4i',label:'C4I',icon:'ð¡',color:'#60A5FA',count:22},
+  {id:'cyber',label:'Cyber',icon:'ð¥ï¸',color:'#06B6D4',count:19},
+  {id:'logistics',label:'Logistics',icon:'ð¦',color:'#F59E0B',count:20},
+  {id:'psyop',label:'Info Ops',icon:'ð¢',color:'#10B981',count:21}
+];
+const BLUEPRINTS = {
+  cbrn:{name:'CBRN-THREAT-ASSESS-v3.2',acc:'94.2%',lat:'2.1s'},
+  isr:{name:'ISR-FUSION-BRIEF-v2.8',acc:'91.7%',lat:'1.8s'},
+  c4i:{name:'OPORD-GENERATOR-v4.1',acc:'93.5%',lat:'2.4s'},
+  cyber:{name:'CYBER-HUNT-SYNTH-v2.5',acc:'89.8%',lat:'1.5s'},
+  logistics:{name:'LOG-PREDICT-MAINT-v3.0',acc:'92.1%',lat:'1.9s'},
+  psyop:{name:'IO-MSG-EFFECT-v2.3',acc:'87.4%',lat:'2.6s'}
+};
+const EXAMPLES = {
+  cbrn:'Sarin ê°ì¤ ì´í¬ ìì¬ ì§ì­ì ëí CBRN ìí íê°ë¥¼ ì¤ìíë¼. íí¥ ë¶ì 12km/h, ì¸êµ¬ë° ì§ì§ì­ ë°ê²½ 3km ë´ ìì¹.',
+  isr:'ìì± SAR ì´ë¯¸ì§ì SIGINT ë°ì´í°ë¥¼ ìµí¨íì¬ ë¶ì 37.5Â° ëê²½ 127Â° ì§ì­ì ì´ëì ë°ì¬ë íëì ëí ì ë³´ ë¸ë¦¬íì ìì±íë¼.',
+  c4i:'ì°ëê¸ ê³µê²©ìì ì ìí OPORDë¥¼ ìì±íë¼. AO: ëì ì§ì­, ì : ê¸°ê³í ëë, ìêµ°: ë³´ë³ì¬ë¨+í¬ë³ëë.',
+  cyber:'APT ê·¸ë£¹ì C2 ì¸íë¼ì ëí ì¬ì´ë² ìí íí ì¿¼ë¦¬ë¥¼ ìì±íë¼. IOC: ìì¬ì¤ë¬ì´ DNS íëë§ í¨í´, PowerShell ëëí íë íì§.',
+  logistics:'íë°ë ì ì¬ì 2ê° ì¬ë¨ 72ìê° ìì ì ìí êµ°ì ìì¸¡ ì ë¹ ê³íì ìë¦½íë¼. íì½, ì°ë£, ìë, ìë¬´ ë¬´ì ììë ì°ì¶.',
+  psyop:'ì  ì ë ¹ì§ ë¯¼ê°ì¸ ëì ì ë³´ìì  ë©ìì§ë¥¼ ì¤ê³íë¼. ëª©í: í­ë³µ ì ë ë° ë¯¼ê° í¼í´ ìµìí. ì±ë: FM ë¼ëì¤, ì ë¨, SNS.'
+};
+const RESPONSES = {
+  gpt4o:{
+    cbrn:{title:'CBRN Threat Assessment Report â Sarin Exposure Zone',sections:[{h:'THREAT IDENTIFICATION',b:'Agent: GB (Sarin), Nerve Agent. Dispersal: Aerosol/Vapor. Persistence: 2-24hrs (temp dependent). LC50: 35mgÂ·min/mÂ³. Wind vector NW 12km/h indicates SE plume propagation toward populated zone.'},{h:'HAZARD PREDICTION',b:'Immediate Danger Zone (IDZ): 1.2km downwind. Vapor Hazard Zone: 3.8km (exceeds 3km population radius). Estimated affected population: 12,000-15,000. Time to hazard arrival at population center: ~15 minutes.'},{h:'RECOMMENDED ACTIONS',b:'1) Activate MOPP-4 for all units within 5km. 2) Initiate civilian shelter-in-place via EBS. 3) Deploy M93A1 Fox NBCRS for confirmation sampling. 4) Establish decon corridor at grid ref 37.48N/127.02E. 5) Request MEDEVAC standby (nerve agent casualties).'}],scores:{accuracy:'94.8%',relevance:'96.1%',compliance:'MIL-STD-2525D'}},
+    isr:{title:'Multi-INT Fusion Intelligence Brief â Mobile TEL Activity',sections:[{h:'COLLECTION SUMMARY',b:'SAR imagery (0.5m resolution) indicates 3 potential TEL signatures at grid 37.5Â°N/127Â°E. SIGINT intercepts show increased encrypted HF communications correlated with historical pre-launch patterns.'},{h:'ASSESSMENT',b:'Confidence: MODERATE-HIGH (3/5 indicators positive). TEL displacement from garrison consistent with dispersal drill OR preparation for launch. Recommend persistent ISR coverage with 30-min revisit rate.'},{h:'INTELLIGENCE GAPS',b:'1) No HUMINT confirmation of warhead mating activity. 2) MASINT seismic sensors offline in sector. 3) Weather degrading EO/IR collection window (next 6hrs).'}],scores:{accuracy:'91.2%',relevance:'93.7%',compliance:'ICD-203'}},
+    c4i:{title:'OPORD â Brigade Attack Operation (Urban)',sections:[{h:'SITUATION',b:'Enemy: Mech BN (-) defending urban sector. 2x MBT platoons, 4x BMP-3 sections, integrated AD (SA-18). Friendly: Inf BDE w/ attached FA BN (155mm SP). AO: 8kmÂ² urban terrain, 3 key intersections.'},{h:'MISSION',b:'BDE attacks NLT 0400H to seize OBJ ALPHA (City Hall complex) and OBJ BRAVO (Bridge crossing) in order to enable DIV passage of lines.'},{h:'EXECUTION',b:'Phase 1 (H-2 to H): FA suppression of enemy AD, EW jamming. Phase 2 (H to H+4): 1BN fixes from south, 2BN main effort flanking east through industrial zone. Phase 3 (H+4 to H+8): 3BN exploits to OBJ BRAVO.'}],scores:{accuracy:'93.1%',relevance:'95.4%',compliance:'ATP 5-0.1'}},
+    cyber:{title:'Cyber Threat Hunt â APT C2 Infrastructure Detection',sections:[{h:'HUNT HYPOTHESIS',b:'APT group utilizing DNS beaconing for C2 with PowerShell-based payload execution. Expected TTPs: T1071.004 (DNS), T1059.001 (PowerShell), T1027 (Obfuscation).'},{h:'DETECTION QUERIES',b:'1) DNS: query_length > 50 AND query_type IN ("TXT","NULL") AND frequency > 10/hr\n2) PowerShell: EventID 4104 WHERE ScriptBlock CONTAINS ("IEX","Invoke-Expression","[Convert]::FromBase64")\n3) Network: connections WHERE dst_port=443 AND bytes_out < 200 AND interval_stddev < 5s'},{h:'RECOMMENDED ACTIONS',b:'Deploy Sigma rules to SIEM. Enable PowerShell Module Logging (GPO). Implement DNS sinkhole for suspicious domains. Isolate affected endpoints for forensic imaging.'}],scores:{accuracy:'89.3%',relevance:'91.8%',compliance:'NIST SP 800-61r2'}},
+    logistics:{title:'Logistics Predictive Maintenance â 2 DIV 72hr Operation',sections:[{h:'AMMUNITION FORECAST',b:'5.56mm: 2.4M rounds (1.2M/DIV). 155mm HE: 4,800 rounds. ATGM: 360 missiles. Mortar 81mm: 12,000 rounds. Critical: ATGM resupply at H+36 (60% consumption rate projected).'},{h:'FUEL & SUBSISTENCE',b:'JP-8: 840,000 gallons (vehicle + aviation). MOGAS: 120,000 gallons. MRE: 108,000 meals. Water: 360,000 gallons (potable). Establish FSP at 3 points along MSR.'},{h:'MEDICAL',b:'Estimated casualties (moderate scenario): 280 WIA, 45 KIA. Blood products: 840 units RBC required. MEDEVAC sorties: ~180 (ground + air). Forward surgical team positioning at grid [CLASSIFIED].'}],scores:{accuracy:'92.5%',relevance:'94.0%',compliance:'FM 4-0'}},
+    psyop:{title:'Information Operations Message Design â Surrender Appeal',sections:[{h:'TARGET AUDIENCE ANALYSIS',b:'Primary: Enemy conscript soldiers (18-25, low morale indicators). Secondary: Civilian population under occupation. Vulnerabilities: supply shortages, family separation, uncertain command authority.'},{h:'MESSAGE FRAMEWORK',b:'Theme: "Your leaders have abandoned you. Your families are waiting."\nFM Radio (3x daily): Personal testimonials from surrendered soldiers.\nLeaflet: Safe surrender procedure + QR code for GPS rally point.\nSNS: Geo-targeted ads showing humanitarian corridor routes.'},{h:'EFFECTIVENESS METRICS',b:'Target: 5-8% surrender rate increase within 72hrs. Measure: HUMINT debriefs, leaflet return rate, SNS engagement analytics. PSYOP Impact Assessment at H+48.'}],scores:{accuracy:'87.9%',relevance:'90.2%',compliance:'FM 3-53'}}
+  },
+  gemini:{
+    cbrn:{title:'CBRN ì ìëì â ì¬ë¦° íì­àëª¨ë¸ë§ ê²°ê³¼',sections:[{h:'íì­àìë®¬ë ì´ì',b:'Gaussian Plume ëª¨ë¸ ì ì©. íì 12km/h, ëê¸°ìì ë Dë±ê¸. ìµë ëë ì§ì : ì´í¬ ìì ìì SE ë°©í¥ 800m. ì¹ì¬ ëë ëë¬ ë²ì: 1.5km. ë°ì¹ì¬(ICt50) ë²ì: 4.2km.'},{h:'ì¸êµ¬ ë¸ì¶ ë¶ì',b:'0-1km: 3,200ëª (ìº'ªÀ ëí¼ íì). 1-3km: 8,400ëª (ì¤ë´ ëí¼). 3-5km: 22,000ëª (ëª¨ëí°ë§). ì·¨ì½ìì¤: ë°ì 1ê°ì, íêµ 3ê°ì 3km ë´ ìì¹.'},{h:'ëì íë¡í ì½',b:'T+0~5min: ê²½ë³´ ë°ë ¹ (ì§ìì²´ CBS). T+5~15min: 1ì°¨ ëí¼ ì¤ì. T+15~30min: CBRN ì ì°¨í í¬ì (CAM/JCAD íì§). T+30min~: ì ë ê±°ì  ì´ì© ê°ì.'}],scores:{accuracy:'93.6%',relevance:'95.8%',compliance:'KS-CBRN-001'}},
+    isr:{title:'SAR/SIGINT ìµí© ì ë³´ë¶ì â ì´ëì ë°ì¬ë íê°',sections:[{h:'ììì ë³´ ë¶ì',b:'SAR íë°©ì°ë ë¶ì ê²°ê³¼ 3ê° ì°¨ë í´ë¬ì¤í° ìë³. ì°¨ë ê¸¸ì´ 15-18m (TEL ê·ê²© ì¼ì¹). ì§ë 72ìê° ëë¹ 200m ì´ë íì¸. ìì¥ë§ ì ì© ì¶ì .'},{h:'ì¡í¸ì ë³´ ìê´ë¶ì',b:'HF ìí¸í íµì  42ê±´/24h (íì ëë¹ 310% ì¦ê°). íµì  í¨í°ì´ ê³¼ê±° ë°ì¬ íë ¨ ì í¨í´ê³¼ 87% ì ì¬. í¹ì  ì£¼íì ëì­ ì ê· íì±í ê°ì§.'},{h:'ì¢í© íë¨',b:'ìí ìì¤: ìì¹ (WATCHCON-2 ê¶ê³ ). ë°ì¬ ì¤ë¹ ê°ë¥ ìê°: 24-48ìê° ì¶ì . íì ìì§ ì°ì ìì: GEOINT ì¬ë°©ë¬¸, HUMINT íì¸.'}],scores:{accuracy:'90.4%',relevance:'92.9%',compliance:'JIOC-K SOP'}},
+    c4i:{title:'ìì ëªë ¹ì â ì¬ë¨ê¸ ëìì§ì­ ê³µê²©ìì ',sections:[{h:'ì  ìí©',b:'ê¸°ê³í ëë(-) ë°©ì´. ì£¼ë ¥: T-72B3 2ê° ìë, BMP-3 4ê° ë¶ë. ëê³µ: SA-18 MANPAD. ì¥ì ë¬¼: ì£¼ì êµì°¨ë¡ 3ê°ì ë°ë¦¬ì¼ì´ë. ìë¹: ëì ì°¨í 1ê° ë¶ë(ìì¹ ë¯¸íì¸).'},{h:'ìêµ° ê³í',b:'ì£¼ê³µ: 2ëë (ëì¸¡ ì°ìì§êµ¬ ì°íê¸°ë). ì¡°ê³µ: 1ëë (ë¨ì¸¡ ê³ ì°«). ìë¹: 3ëë (ì ê³¼íë/OBJ BRAVO). íë ¥ì§ì: FAëë 155mm, ì¬ê²©ê³í "THUNDER".'},{h:'íì¡°ì¬í­',b:'íë ¥íµì ì : PL BLUE (Phase 1â2 ì í). ë¯¼ê°ì¸ íµì : ë¹ì í¬ì ëí¼ë¡ 3ê° íë³´. ROE: Card Alpha ì ì© (íì¸ ì¬ê²© ìì¹).'}],scores:{accuracy:'92.8%',relevance:'94.6%',compliance:'í©ì°¸ ì¼ì êµë²'}},
+    cyber:{title:'ì¬ì´ë² ìí íí â APT C2 íì§ í¨í¤ì§',sections:[{h:'ìí ëª¨ë¸ë§',b:'ê³µê²© ê¸°ë² ë§¤í: MITRE ATT&CK T1071.004 â T1059.001 â T1027. ìì í¬ì²´ì¸: DNS í°ëë§ â PowerShell ë¤ì´ë¡ë â ë©ëª¨ë¦¬ ë´ ì¤í. íê·  ì²´ë¥ ìê°: 45ì¼ ì¶ì .'},{h:'íì§ ë£°ì',b:'YARA Rule: dns_beacon_detector (ìí¸ë¡í¼ > 3.5ì¸ ìë¸ëë©ì¸ ì¿¼ë¦¬). Sigma: powershell_obfuscation_v2 (Base64+IEX ì¡°í©). Zeek Script: long_dns_txt_response (TXT ë ì½ë > 255byte).'},{h:'ëì ì ì°¨',b:'Phase 1: ìì¬ í¸ì¤í¸ ë¤í¸ìí¬ ê²©ë¦¬ (VLAN ì´ë). Phase 2: ë©ëª¨ë¦¬ ë¤í + ëì¤í¬ ì´ë¯¸ì§ íë³´. Phase 3: IOC ì¶ì¶ â ì ì¬ IOC ë°°í¬ â ì¶ê° ê°ì¼ í¸ì¤í¸ íì.'}],scores:{accuracy:'88.7%',relevance:'90.5%',compliance:'KISA ì¬ì´ë² ìí ëì ê°ì´ë'}},
+    logistics:{title:'êµ¬ì ìì ìì¸¡ â 2ê° ì¬ë¨ 72ìê° ìì ',sections:[{h:'íì½ ììë',b:'5.56mm: 240ë§ë° (ì¬ëë¹ 120ë§). 155mm: 4,800ë° (ìê°ë¹ 33ë°/í¬ë). ëì ì°¨ë¯¸ì¬ì¼: 360ë°. 81mm ë°ê²©í¬: 12,000ë°. íµì¬ ë³´ê¸ì : H+36ìATGM Ò4ãtë³´ê¸ì´ íì.'},{h:'ì°ë£/ê¸ì',b:'ê²½ì : 320ë§ ë¦¬í° (ê¸°ëì¥ë¹). í­ê³µì : 180ë§ ë¦¬í°. ì í¬ìí: 108,000ì. ìì©² : 136ë§ ë¦¬í°. ì ë°©ë³´ê¸ì   3ê°ì MSR ì ë°°ì¹.'},{h:'ìë¬´ ì§ì',b:'ìì ì¬ìì (ì¤ê° ìëë¦¬ì¤): ì ì 280ëª, ì ì¬ 45ëª. íì¡ì ì : 840ë¨ì. íì¡ ìí°: 180í. ì ë°©ì¸ê³¼í 2ê°ì¡° ì´ì©. ìê¸íì íì¡ìê° ëª©í: 60ë¶ ì´ë´.'}],scores:{accuracy:'91.9%',relevance:'93.6%',compliance:'êµ°ìì°¸ëª¨ ìë¬´ìí ì§ì¹¨'}},
+    psyop:{title:'ì ë³´ìì  ë©ìì§ ì¤ê³ â í­ë³µ ì ë ìº íì¸',sections:[{h:'íì  ì²­ì¤ íë¡íì¸',b:'1ì°¨: ì  ì§ì§ë³ (18-25ì¸, ì¬ê¸° ì í ì§í¶_). 2ì°¨: ì ë ¹ì§ ë¯¼ê°ì¸. ì·¨ì½ì : ë³´ê¸ ë¶ì¡± (ìë 3ì¼ë¶ ë¯¸ë§), ê°ì¡± ì°ë½ ëì , ì§íê³íµ í¼ë.'},{h:'ë©ìì§ ì¤ê³',b:'íµì¬ íë§: "ë¹ì ì ì§í°ê´ì ëë§­ê°ìµëë¤. ê°ì¡±ì´ ê¸°ë¤ë¦½ëë¤."\nFM ë¼ëì¤(1ì¼ 3í): í¬í­ ë³ì¬ ì¸í°ë·° ë°©ì¡.\nì ë¨(50ë§ë§¤): ìì  í¬í­ ì ì°¨ + QRì½ë(ì§ê²°ì§ GPS).\nSNS: ì§ì¤íê²í ê´ê³  (ì¸ëì£¼ì íë ê²½ë¡ ìë´).'},{h:'í¨ê³¼ ì¸¡ì ',b:'ëª©í: 72ìê° ë´ í¬í­ë¥  5-8% ìì¹. ì¸¡ì : HUMINT ì¥ë¬¸ ê²°ê³¼, ì ë¨ íìì¨, SNS ëë¬/ì°¸ì¬ì¨. H+48ì PSYOP í¨ê³¼ íê° ì¤ì.'}],scores:{accuracy:'86.5%',relevance:'89.8%',compliance:'ì ë³´ìì  êµë²'}}
+  },
+  grok3:{
+    cbrn:{title:'[GROK-3 REAL-TIME] Sarin Threat â Live Situation Analysis',sections:[{h:'LIVE THREAT FEED',b:'Cross-referencing 47 open-source sensors + meteorological data. Sarin (GB) vapor cloud modeled: max concentration 8.2mg/mÂ³ at 600m SE. Wind shift predicted in 22min (bearing change to SSE). Social media monitoring: 3 unconfirmed civilian reports of "chemical smell" within 2km radius.'},{h:'PREDICTIVE MODELING',b:'ML ensemble forecast (3 models): 78% probability cloud reaches populated area within 18min. Hospital surge capacity model: nearest facility (1,200 beds) will exceed capacity at >500 symptomatic patients. Atropine stockpile check: regional reserves sufficient for ~800 treatments.'},{h:'RECOMMENDED PRIORITIES',b:'IMMEDIATE: Reverse-911 to 15,000 residents. URGENT: Pre-position antidote caches at 4 distribution points. MONITOR: Wind shift model update every 5min. COORDINATE: Neighboring district mutual aid activation.'}],scores:{accuracy:'93.1%',relevance:'95.2%',compliance:'FEMA ICS-214'}},
+    isr:{title:'[GROK-3] Open Source + Technical Intelligence Fusion',sections:[{h:'OSINT LAYER',b:'Satellite imagery marketplace: 2 commercial providers show construction activity at coordinates. Social media geolocation: 7 posts from military personnel within 5km (opsec violations). Maritime AIS data: unusual cargo vessel rerouting pattern detected in adjacent waters.'},{h:'TECHINT CORRELATION',b:'RF emission analysis: new radar signature (X-band, pulse repetition consistent with fire control radar). Thermal satellite pass (06:00 UTC): heat signatures consistent with vehicle engine warm-up at 3 locations. Pattern matches 67% with historical pre-exercise activity, 33% with operational preparation.'},{h:'REAL-TIME ASSESSMENT',b:'Confidence level: MODERATE. Key discriminator needed: next commercial satellite pass in 4hrs will confirm/deny vehicle displacement. Recommend: deploy UAV for persistent surveillance if available.'}],scores:{accuracy:'90.8%',relevance:'92.1%',compliance:'OSINT Framework v4.2'}},
+    c4i:{title:'[GROK-3] Dynamic OPORD Generator â Urban Assault',sections:[{h:'AI-OPTIMIZED COA',b:'Analyzed 2,847 historical urban operations. Recommended COA: "Eastern Hook" â simultaneous feint from south (1BN) with primary assault through industrial corridor (2BN). Historical success rate for similar geometry: 73%. Key risk: 800m open ground crossing at Phase 2 transition.'},{h:'EXECUTION MATRIX',b:'H-2: EW blanket + FA prep (48 rounds/target, 6 priority targets). H-hour: 1BN demonstration attack, 2BN crosses LD. H+2: CAS on-call (2x rotary wing). H+4: 3BN commits through 2BN breach. H+6: Consolidation on OBJ ALPHA. H+8: Exploitation to OBJ BRAVO.'},{h:'AI WARGAME RESULT',b:'1000x Monte Carlo simulation: Success probability 71.3%. Primary failure mode: enemy reserve counterattack at H+3 (23% of failures). Mitigation: pre-planned CAS trigger line at PL RED.'}],scores:{accuracy:'92.4%',relevance:'94.8%',compliance:'MDMP (ATP 5-0)'}},
+    cyber:{title:'[GROK-3] Real-Time Threat Hunt â Live C2 Detection',sections:[{h:'LIVE NETWORK ANALYSIS',b:'Scanning DNS logs in real-time. Identified 3 suspicious beacon patterns: (1) *.update-service[.]xyz â 45-second interval, (2) *.cdn-static[.]net â jittered 30-60s, (3) TXT record queries to legitimate-looking domains with high entropy subdomains (avg 4.2 bits/char).'},{h:'THREAT ACTOR PROFILING',b:'Pattern matches APT-29 (Cozy Bear) TTPs with 72% confidence. Alternative hypothesis: APT-41 (Winnti) â 18% confidence. Tool signatures suggest Cobalt Strike 4.x with custom malleable C2 profile. Estimated initial access: 30-45 days ago based on certificate registration dates.'},{h:'AUTO-GENERATED RESPONSE',b:'Pushed to SOAR: 1) DNS sinkhole for 3 domains. 2) EDR isolation query for 12 potentially affected endpoints. 3) Firewall rules blocking identified C2 IPs. 4) Threat intel sharing via STIX/TAXII to sector ISAC.'}],scores:{accuracy:'88.1%',relevance:'91.4%',compliance:'MITRE ATT&CK v14'}},
+    logistics:{title:'[GROK-3] AI-Powered Logistics Forecasting Engine',sections:[{h:'CONSUMPTION MODELING',b:'Trained on 12,000+ historical operations. For 2-DIV 72hr urban scenario: Ammunition burn rate peaks at H+12 (Phase 2 assault). Fuel consumption 40% higher than open terrain baseline. Medical casualties follow Lanchester attrition model with urban modifier (1.8x).'},{h:'SUPPLY CHAIN OPTIMIZATION',b:'Optimal MSR routing (3 routes, weighted by enemy indirect fire threat): Route ALPHA (primary, 60% throughput), Route BRAVO (alternate, 30%), Route CHARLIE (emergency, 10%). Pre-positioned cache recommendations at 4 grid points based on consumption heat map.'},{h:'PREDICTIVE ALERTS',b:'WARNING: ATGM stockpile reaches critical (20%) at H+32 (4hrs earlier than linear model predicts due to urban engagement rates). RECOMMEND: Emergency resupply convoy departs H+24. WARNING: Blood product shortage predicted at H+48 under moderate casualty scenario.'}],scores:{accuracy:'91.7%',relevance:'93.2%',compliance:'NATO STANAG 2034'}},
+    psyop:{title:'[GROK-3] AI Information Operations â Influence Campaign Design',sections:[{h:'SOCIAL MEDIA INTELLIGENCE',b:'Real-time monitoring of 14 platforms. Enemy soldier morale indicators: 67% negative sentiment in intercepted messages (up from 41% last week). Key grievances: food quality (mentioned 340 times), family contact (280), command distrust (195). Viral potential: "abandoned by leaders" narrative already organic.'},{h:'MULTI-CHANNEL CAMPAIGN',b:'AI-optimized message variants (A/B tested across 6 cultural frameworks): Radio: Emotional appeal (family reunion theme) â predicted 12% higher engagement. Leaflets: Practical (surrender procedure with map) â predicted 8% conversion. Digital: Video testimonials with geofenced delivery â predicted 15% click-through.'},{h:'REAL-TIME OPTIMIZATION',b:'Deploy â Measure â Adapt loop every 6hrs. Track: surrender rate, message pickup on enemy COMMS, civilian sentiment shift. AI adjusts message tone/timing automatically. Projected outcome: 6.2% surrender rate increase (95% CI: 4.1-8.3%).'}],scores:{accuracy:'86.9%',relevance:'89.7%',compliance:'JP 3-13.2'}}
+  }
+};
+
+const BP_CATALOG = {
+  cbrn:[
+    {name:'CBRN-THREAT-ASSESS-v3.2',desc:'íí/ìë¬¼/ë°©ì¬ë¥/í´ ìí ìë³ ë° ìí¥ íê° ìëí',acc:94.2,runs:1847,status:'verified'},
+    {name:'CBRN-DECON-PROTOCOL-v2.1',desc:'ì¤ì¼ì§ì­ ì ë ì ì°¨ ë° ìì í ë¹ ìµì í',acc:91.8,runs:923,status:'verified'},
+    {name:'CBRN-HAZARD-PREDICT-v1.7',desc:'ê¸°ì/ì§í ê¸°ë° ì í´ë¬¼ì§ íì° ìì¸¡ ëª¨ë¸',acc:89.5,runs:654,status:'beta'}
+  ],
+  isr:[
+    {name:'ISR-FUSION-BRIEF-v2.8',desc:'ë¤ì¤ ì ë³´ì ìµí© ë¸ë¦¬í ìë ìì±',acc:91.7,runs:1562,status:'verified'},
+    {name:'ISR-PATTERN-DETECT-v3.0',desc:'ì´ë í¨í´ ë¶ì ë° ì´ì ì§í¶_ íì§',acc:90.3,runs:1103,status:'verified'},
+    {name:'ISR-COLLECTION-PLAN-v2.4',desc:'ìì§ ìì° ìµì  ë°°ë¶ ë° ê³í ìì±',acc:88.9,runs:784,status:'beta'}
+  ],
+  c4i:[
+    {name:'OPORD-GENERATOR-v4.1',desc:'ìì ëªë ¹ì 5ë¨ êµ¬ì¡° ìë ìì±',acc:93.5,runs:2103,status:'verified'},
+    {name:'COA-WARGAME-v2.6',desc:'ë°©ì± ìê²ì´ë° ë° ë¹êµ ë¶ì',acc:91.2,runs:967,status:'verified'},
+    {name:'BDE-SYNCMATRIX-v1.9',desc:'ì¬ë¨ê¸ ì í¬ëê¸°í ë§¤í¸ë¦­ì¤ ìì±',acc:89.7,runs:543,status:'beta'}
+  ],
+  cyber:[
+    {name:'CYBER-HUNT-SYNTH-v2.5',desc:'ìí íí ê°ì¤ ìì± ë° íì§ ì¿¼ë¦¬ ìëí',acc:89.8,runs:1345,status:'verified'},
+    {name:'CYBER-INCIDENT-RSP-v3.1',desc:'ì¬ì´ë² ì¬ê³  ëì ì ì°¨ ë° í¬ë ì ê°ì´ë',acc:88.4,runs:876,status:'verified'},
+    {name:'CYBER-VULN-ASSESS-v2.0',desc:'ì·¨ì½ì  ë¶ì ë° í¨ì¹ ì°ì ìì ê²°ì ',acc:87.1,runs:612,status:'beta'}
+  ],
+  logistics:[
+    {name:'LOG-PREDICT-MAINT-v3.0',desc:'ì ë¹ ìì ìì¸¡ ë° ë¶í ì ì  ì¡°ë¬',acc:92.1,runs:1678,status:'verified'},
+    {name:'LOG-SUPPLY-OPT-v2.7',desc:'ë³´ê¸ë¡ ìµì í ë° ì ë°©ë³´ê¸ì  ë°°ì¹',acc:90.6,runs:1234,status:'verified'},
+    {name:'LOG-CASUALTY-EVAC-v1.8',desc:'ì¬ìì íì¡ ê³í ë° ìë£ì§ì ìì ì°ì¶',acc:88.3,runs:567,status:'beta'}
+  ],
+  psyop:[
+    {name:'IO-MSG-EFFECT-v2.3',desc:'ì ë³´ìì  ë©ìì§ í¨ê³¼ ìì¸¡ ë° ìµì í',acc:87.4,runs:1089,status:'verified'},
+    {name:'IO-TARGET-PROFILE-v2.0',desc:'íì  ì²­ì¤ íë¡íì¼ë§ ë° ì·¨ì½ì  ë¶ì',acc:86.1,runs:743,status:'verified'},
+    {name:'IO-CAMPAIGN-PLAN-v1.5',desc:'ë¤ì±ë ì ë³´ìì  ìº íì¸ ê³í ìë¦½',acc:84.7,runs:432,status:'beta'}
+  ]
+};
+
+// ===== STATE =====
+let selModel = 'gpt4o';
+let selDomain = 'cbrn';
+let selBpDomain = 'cbrn';
+
+// ===== LOGIN =====
+function doLogin(){
+  const code = document.getElementById('accessCode').value.trim();
+  if(!code && code !== ''){document.getElementById('accessCode').classList.add('err');setTimeout(()=>document.getElementById('accessCode').classList.remove('err'),400);return}
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  initApp();
+}
+// Allow enter key
+document.getElementById('accessCode').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+// Auto-login on any input for demo
+setTimeout(()=>{document.getElementById('accessCode').placeholder='Enter any code or press Enter';},500);
+
+// ===== INIT =====
+function initApp(){
+  renderModelsRow();
+  renderDomainGrid();
+  renderModelSelector();
+  renderDomainSelector();
+  updateBlueprintInfo();
+  renderBpTabs();
+  renderBpList();
+}
+
+function renderModelsRow(){
+  const c = document.getElementById('modelsRow');
+  c.innerHTML = MODELS.map(m=>`
+    <div class="ai-model-card">
+      <div class="ai-model-logo" style="background:${m.color}">${m.logo}</div>
+      <div class="ai-model-name">${m.name}</div>
+      <div class="ai-model-provider">${m.provider}</div>
+      <div class="ai-model-users">${m.users}</div>
+    </div>
+  `).join('');
+}
+
+function renderDomainGrid(){
+  const c = document.getElementById('domainGrid');
+  c.innerHTML = DOMAINS.map(d=>`
+    <div class="domain-card" onclick="goToDomain('${d.id}')">
+      <div class="domain-icon">${d.icon}</div>
+      <div class="domain-label" style="color:${d.color}">${d.label}</div>
+      <div class="domain-count">${d.count} blueprints</div>
+    </div>
+  `).join('');
+}
+
+function goToDomain(domId){
+  selDomain = domId;
+  switchTab('demo', document.querySelectorAll('.tab')[1]);
+  setTimeout(()=>{
+    renderDomainSelector();
+    updateBlueprintInfo();
+  },100);
+}
+
+function renderModelSelector(){
+  const c = document.getElementById('modelSelector');
+  c.innerHTML = MODELS.map(m=>`
+    <div class="sel-chip ${m.id===selModel?'active':''} ${m.disabled?'disabled':''}"
+         onclick="${m.disabled?'':'selectModel(\''+m.id+'\')'}"
+         style="${m.id===selModel?'background:'+m.color+';border-color:'+m.color:''}">
+      ${m.disabled?'ð ':''} ${m.name.split(' ')[0]}
+    </div>
+  `).join('');
+}
+
+function renderDomainSelector(){
+  const c = document.getElementById('domainSelector');
+  c.innerHTML = DOMAINS.map(d=>`
+    <div class="sel-chip ${d.id===selDomain?'active':''}" onclick="selectDomain('${d.id}')"
+         style="${d.id===selDomain?'background:'+d.color+';border-color:'+d.color+';color:#fff':''}">
+      ${d.icon} ${d.label}
+    </div>
+  `).join('');
+}
+
+function selectModel(id){selModel=id;renderModelSelector()}
+function selectDomain(id){selDomain=id;renderDomainSelector();updateBlueprintInfo()}
+
+function updateBlueprintInfo(){
+  const bp = BLUEPRINTS[selDomain];
+  document.getElementById('bpName').textContent = bp.name;
+  document.getElementById('bpAcc').textContent = bp.acc;
+  document.getElementById('bpLat').textContent = bp.lat;
+}
+
+function loadExample(){
+  document.getElementById('promptInput').value = EXAMPLES[selDomain];
+}
+
+function executePrompt(){
+  const btn = document.getElementById('btnExec');
+  const input = document.getElementById('promptInput').value.trim();
+  if(!input){document.getElementById('promptInput').style.borderColor='var(--rose)';setTimeout(()=>document.getElementById('promptInput').style.borderColor='',500);return}
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> PROCESSING...';
+
+  const delay = 1500 + Math.random()*2000;
+  setTimeout(()=>{
+    btn.disabled = false;
+    btn.textContent = 'EXECUTE PROMPT';
+    showResult();
+  }, delay);
+}
+
+function showResult(){
+  const data = RESPONSES[selModel]?.[selDomain];
+  if(!data)return;
+
+  const model = MODELS.find(m=>m.id===selModel);
+  const resModel = document.getElementById('resModel');
+  resModel.textContent = model.name;
+  resModel.style.background = model.color;
+
+  document.getElementById('resTime').textContent = BLUEPRINTS[selDomain].lat;
+  document.getElementById('resTitle').textContent = data.title;
+
+  const secDiv = document.getElementById('resSections');
+  secDiv.innerHTML = data.sections.map(s=>`
+    <div class="result-section">
+      <div class="result-section-head">${s.h}</div>
+      <div class="result-section-body">${s.b.replace(/\n/g,'<br>')}</div>
+    </div>
+  `).join('');
+
+  const scoreDiv = document.getElementById('resScores');
+  scoreDiv.innerHTML = `
+    <div class="score-item"><div class="score-val" style="color:var(--emerald)">${data.scores.accuracy}</div><div class="score-label">ACCURACY</div></div>
+    <div class="score-item"><div class="score-val" style="color:var(--blue)">${data.scores.relevance}</div><div class="score-label">RELEVANCE</div></div>
+    <div class="score-item"><div class="score-val" style="color:var(--cyan)">${data.scores.compliance}</div><div class="score-label">COMPLIANCE</div></div>
+  `;
+
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+}
+
+// ===== BLUEPRINTS =====
+function renderBpTabs(){
+  const c = document.getElementById('bpTabs');
+  c.innerHTML = DOMAINS.map(d=>`
+    <div class="bp-tab ${d.id===selBpDomain?'active':''}" onclick="selectBpDomain('${d.id}')">${d.icon} ${d.label}</div>
+  `).join('');
+}
+
+function selectBpDomain(id){
+  selBpDomain = id;
+  renderBpTabs();
+  renderBpList();
+}
+
+function renderBpList(){
+  const items = BP_CATALOG[selBpDomain] || [];
+  const c = document.getElementById('bpList');
+  c.innerHTML = items.map(bp=>`
+    <div class="bp-item">
+      <div class="bp-item-head">
+        <div class="bp-item-name">${bp.name}</div>
+        <div class="bp-item-badge ${bp.status}">${bp.status === 'verified' ? 'â Verified' : 'Î² Beta'}</div>
+      </div>
+      <div class="bp-item-desc">${bp.desc}</div>
+      <div class="bp-item-meta">
+        <span>Accuracy: ${bp.acc}%</span>
+        <span>Runs: ${bp.runs.toLocaleString()}</span>
+        <span>Models: 3</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== TAB NAVIGATION =====
+function switchTab(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ===== SERVICE WORKER =====
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW registered')).catch(()=>{});
+}
+</script>
+</body>
+</html>
