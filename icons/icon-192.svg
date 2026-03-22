@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1E3A5F"/>
+      <stop offset="100%" stop-color="#0B1120"/>
+    </radialGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#bg)"/>
+  <circle cx="96" cy="88" r="50" fill="url(#glow)"/>
+  <!-- Hex frame -->
+  <polygon points="96,38 146,67 146,109 96,138 46,109 46,67" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-opacity="0.4"/>
+  <!-- Crosshair ticks -->
+  <line x1="96" y1="32" x2="96" y2="42" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="96" y1="134" x2="96" y2="144" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="40" y1="88" x2="50" y2="88" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.6"/>
+  <line x1="142" y1="88" x2="152" y2="88" stroke="#3B82F6" stroke-width="2" stroke-opacity="0.6"/>
+  <!-- Cardinal dots -->
+  <circle cx="96" cy="30" r="3" fill="#06B6D4"/>
+  <circle cx="96" cy="146" r="3" fill="#06B6D4"/>
+  <circle cx="38" cy="88" r="3" fill="#06B6D4"/>
+  <circle cx="154" cy="88" r="3" fill="#06B6D4"/>
+  <!-- TP text -->
+  <text x="96" y="100" text-anchor="middle" font-family="'SF Pro Display','Segoe UI',system-ui,sans-serif" font-weight="800" font-size="52" fill="#FFFFFF" letter-spacing="2">TP</text>
+  <!-- Subtitle -->
+  <text x="96" y="168" text-anchor="middle" font-family="monospace" font-weight="600" font-size="9" fill="#60A5FA" letter-spacing="3">TACTICALPROMPT</text>
+</svg>
